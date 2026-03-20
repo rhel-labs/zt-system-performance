@@ -1,0 +1,140 @@
+= Systemd Investigation
+
+== Investigating the Service
+
+Now that we know Scott installed a service called "system-optimizer.service", let's use systemd tools to investigate what it's actually doing.
+
+[TIP]
+====
+Systemd is the init system and service manager for RHEL. It manages services, their states, and provides powerful tools for investigating service behavior.
+====
+
+== Checking Service Status
+
+The first command to run when investigating a service is `systemctl status`:
+
+[source,bash,role=execute]
+----
+systemctl status system-optimizer.service
+----
+
+This command shows:
+
+* Whether the service is active (running) or inactive
+* The main PID (Process ID) of the service
+* Recent log entries from the service
+* How long it's been running
+* What command it's executing
+
+[IMPORTANT]
+====
+Look carefully at the `ExecStart=` line in the output - this shows the actual command the service is running. Often the service name sounds legitimate, but the actual command reveals the problem.
+====
+
+== Viewing the Control Group Hierarchy
+
+Another powerful tool for investigating systemd services is `systemd-cgls`, which shows the control group (cgroup) hierarchy. This displays which processes belong to which services:
+
+[source,bash,role=execute]
+----
+systemd-cgls --no-pager | grep -A 5 system-optimizer
+----
+
+This command shows:
+
+* The hierarchical tree of control groups
+* Which processes belong to the system-optimizer.service
+* The PIDs (Process IDs) of those processes
+* Child processes spawned by the service
+
+[TIP]
+====
+Control groups (cgroups) are how systemd organizes and tracks resources for services. Every systemd service runs in its own cgroup, making it easy to see all processes associated with a service, even if they fork multiple child processes.
+====
+
+You can also view the full cgroup tree to see all services:
+
+[source,bash,role=execute]
+----
+systemd-cgls --no-pager | head -50
+----
+
+This gives you a complete view of the system's process hierarchy. You should be able to spot the system-optimizer.service and its stress-ng processes consuming resources.
+
+== Viewing the Service Unit File
+
+To understand how the service is configured, let's look at its unit file:
+
+[source,bash,role=execute]
+----
+systemctl cat system-optimizer.service
+----
+
+This shows the complete service definition. Pay attention to:
+
+* `[Unit]` section - Description and dependencies
+* `[Service]` section - What the service actually does
+* `[Install]` section - When and how it starts
+
+[quote, Your Analysis]
+____
+Wait... this "optimizer" is running `stress-ng`? That's a stress testing tool designed to *consume* resources, not optimize them! Scott must have misunderstood what this tool does.
+____
+
+== Checking If It's Enabled
+
+A service can be running right now but might not start automatically at boot. Let's check:
+
+[source,bash,role=execute]
+----
+systemctl is-enabled system-optimizer.service
+----
+
+If this returns "enabled", the service will start automatically every time the system boots. That means stopping it once won't be enough - we'll need to disable it too.
+
+== Viewing Service Logs
+
+Systemd maintains detailed logs through `journalctl`. Let's see what this service has been doing:
+
+[source,bash,role=execute]
+----
+journalctl -u system-optimizer.service -n 20
+----
+
+This shows the last 20 log entries for this specific service unit (`-u` flag). The logs can reveal:
+
+* When the service started
+* Any errors or warnings
+* What the service is actually doing
+
+[NOTE]
+====
+*From: Nate (Senior Sysadmin)*
+
+Great work identifying the problem. The service is running `stress-ng` with parameters that deliberately consume CPU and memory. This is the opposite of "optimization" - it's a stress testing tool!
+
+Classic Scott - he read something online, didn't understand it, and applied it to production without testing.
+
+Now you know *what* is running and *why* it's causing problems. But it helps to see the actual resource impact. In the next module, we'll use system monitoring tools to quantify exactly how much damage this is doing.
+
+-Nate
+====
+
+== What We've Learned
+
+From our systemd investigation, we now know:
+
+* The service is actively running
+* It's running `stress-ng` to deliberately stress the CPU and memory
+* It's enabled to start automatically at boot
+* It's been running since system startup
+* The control group hierarchy shows all processes associated with this service
+
+[NOTE]
+====
+The `systemd-cgls` command is particularly useful when a service spawns multiple child processes. In this case, stress-ng creates several worker processes, and systemd-cgls shows them all grouped under the system-optimizer.service, making it easy to see the full scope of what the service is doing.
+====
+
+This is definitely our culprit. In the next module, we'll use traditional system monitoring tools to see the actual resource impact.
+
+Click *Next* to continue to the System Tools Analysis module.

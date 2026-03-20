@@ -1,0 +1,26 @@
+---
+
+antora:
+  name: modules
+  dir: www
+  modules:
+    - name: module-01
+      label: "Introduction"
+      solveButton: false
+    - name: module-02
+      label: "Initial Assessment"
+      solveButton: false
+    - name: module-03
+      label: "Systemd Investigation"
+      solveButton: false
+    - name: module-04
+      label: "System Tools Analysis"
+      solveButton: false
+    - name: module-05
+      label: "Resolution"
+      solveButton: false
+
+tabs:
+  - name: ">_ terminal"
+    url: /wetty
+

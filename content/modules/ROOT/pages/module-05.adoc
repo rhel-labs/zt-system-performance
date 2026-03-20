@@ -1,0 +1,181 @@
+= Resolution
+
+== Fixing the Problem
+
+Now that we've thoroughly diagnosed the issue, it's time to resolve it. We need to both stop the service immediately AND prevent it from starting again at boot.
+
+[IMPORTANT]
+====
+When resolving service-related issues, remember:
+
+* `systemctl stop` - Stops the service immediately (but it may restart at boot)
+* `systemctl disable` - Prevents automatic startup at boot (but doesn't stop it now)
+* You typically need BOTH to fully resolve the issue
+====
+
+== Step 1: Stop the Service
+
+First, let's stop the service to immediately free up system resources:
+
+[source,bash,role=execute]
+----
+sudo systemctl stop system-optimizer.service
+----
+
+The service should stop immediately. Let's verify:
+
+[source,bash,role=execute]
+----
+systemctl status system-optimizer.service
+----
+
+You should see that the service is now "inactive (dead)". The processes are gone and resources are freed.
+
+== Step 2: Disable the Service
+
+Stopping the service is only half the solution. Remember that the service was *enabled*, meaning it would start automatically at the next boot. We need to disable it:
+
+[source,bash,role=execute]
+----
+sudo systemctl disable system-optimizer.service
+----
+
+This removes the service from automatic startup. Let's verify:
+
+[source,bash,role=execute]
+----
+systemctl is-enabled system-optimizer.service
+----
+
+This should now return "disabled" or an error indicating the service won't start at boot.
+
+[TIP]
+====
+If you wanted to completely remove the service, you could also delete the unit file at `/etc/systemd/system/system-optimizer.service` and run `sudo systemctl daemon-reload`. However, keeping it disabled is often safer - it preserves evidence of what happened and allows investigation later.
+====
+
+== Step 3: Verify System Recovery
+
+Now let's confirm that the system has recovered. Check the load average again:
+
+[source,bash,role=execute]
+----
+uptime
+----
+
+The load should now be much lower, close to or below the number of CPU cores.
+
+Check memory:
+
+[source,bash,role=execute]
+----
+free -h
+----
+
+Available memory should have increased significantly.
+
+Finally, check what's consuming resources now:
+
+[source,bash,role=execute]
+----
+top -b -n 1 | head -20
+----
+
+The stress-ng processes should be completely gone, and CPU idle time (%id) should be much higher.
+
+== Step 4: Document What Happened
+
+Create a brief incident report for the team:
+
+[source,bash,role=execute]
+----
+cat > /home/rhel/incident-report.txt << 'EOF'
+INCIDENT REPORT: System Performance Issue - RESOLVED
+
+Date: $(date)
+Reported by: Users experiencing slow system performance
+
+Problem:
+- High CPU and memory usage
+- System load significantly above normal
+- Service system-optimizer.service consuming resources
+
+Root Cause:
+- Manager Scott installed "system-optimizer.service"
+- Service was running stress-ng (a stress testing tool)
+- Scott misunderstood the tool's purpose - it CONSUMES resources to test
+  system capacity, rather than optimizing performance
+
+Resolution:
+- Stopped the service: systemctl stop system-optimizer.service
+- Disabled automatic startup: systemctl disable system-optimizer.service
+- System resources returned to normal levels
+
+Lessons Learned:
+- Always test new services in non-production environments first
+- Verify what a service actually does before deploying it
+- Just because something has "optimizer" in the name doesn't mean it optimizes
+
+Status: RESOLVED
+EOF
+----
+
+View the report:
+
+[source,bash,role=execute]
+----
+cat /home/rhel/incident-report.txt
+----
+
+[NOTE]
+====
+*From: Nate (Senior Sysadmin)*
+
+Excellent work! You followed a methodical troubleshooting process:
+
+1. ✓ Confirmed the problem existed (high load, high memory usage)
+2. ✓ Identified the problematic service using systemd tools
+3. ✓ Analyzed the impact using system monitoring tools
+4. ✓ Took corrective action (stop + disable)
+5. ✓ Verified the fix worked
+6. ✓ Documented what happened
+
+This is exactly the right approach. Too many people skip straight to step 4 without understanding the problem, or forget step 6 so the same issue happens again.
+
+I'll have a chat with Scott about testing things before deploying to production. Again.
+
+Great work!
+
+-Nate
+
+P.S. - I kept a copy of that incident report. It's going in my "Scott Stories" folder.
+====
+
+== What You've Learned
+
+In this lab, you've learned how to:
+
+* **Detect performance issues** using `uptime`, `free`, and load averages
+* **Investigate systemd services** using `systemctl status`, `systemctl cat`, and `journalctl`
+* **Analyze resource usage** using `top` and `ps` with various options
+* **Resolve service issues** by stopping and disabling problematic services
+* **Verify fixes** by re-checking system metrics
+* **Document incidents** for future reference
+
+These skills apply to many real-world scenarios:
+
+* Runaway services consuming resources
+* Memory leaks in applications
+* CPU-intensive processes affecting system performance
+* Services that shouldn't be running on production systems
+
+[quote, Manager Scott (via email, 30 minutes later)]
+____
+Hey, has anyone seen my performance optimizer service? It seems to have stopped working...
+____
+
+== Congratulations!
+
+You've successfully completed the System Performance Troubleshooting lab. You've learned essential skills for diagnosing and resolving resource consumption issues on RHEL systems.
+
+These troubleshooting techniques will serve you well in any Linux environment, whether you're managing physical servers, virtual machines, or containers.

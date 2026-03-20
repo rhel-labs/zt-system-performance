@@ -1,0 +1,73 @@
+= System Performance Troubleshooting
+
+== Welcome to Super-Business
+
+Welcome to the System Performance Troubleshooting lab! In this hands-on exercise, you'll learn how to diagnose and resolve system resource issues on a RHEL system.
+
+You're a systems administrator at Super-Business, and you've just received an urgent message from Manager Scott.
+
+[quote, Manager Scott - IT Manager]
+____
+URGENT: Performance Optimization Deployed!
+
+Hey everyone,
+
+Great news! I've deployed a new "System Performance Optimizer" on our production server. I read online that keeping CPU and memory "warmed up" makes systems run faster, so I installed a service that does exactly that.
+
+The service is running great - it's using lots of CPU and memory, which means it's working!
+
+You're welcome for the performance boost!
+
+- Scott
+____
+
+[NOTE]
+====
+Before you even log in, you can probably guess this isn't going to end well...
+====
+
+== The Situation
+
+A few minutes after Scott's email, tickets start pouring in from users complaining that the server is running extremely slowly. Your task is to investigate what's happening and resolve the performance issues.
+
+Fortunately, Sysadmin Nate has left you some guidance. Let's read his note:
+
+[source,bash,role=execute]
+----
+cat /home/rhel/note-from-nate.txt
+----
+
+[TIP]
+====
+Nate's advice is solid - we'll take a methodical approach to troubleshooting this issue:
+
+1. *Initial Assessment* - Confirm the system is experiencing performance problems
+2. *Investigation* - Use systemd tools to identify problematic services
+3. *Analysis* - Use system monitoring tools to understand resource usage patterns
+4. *Resolution* - Stop the problematic service and prevent it from recurring
+====
+
+== Lab Environment
+
+You have access to a RHEL 10 system via the terminal tab. Throughout this lab, you'll use various commands to:
+
+* Monitor system resource usage
+* Identify processes consuming excessive resources
+* Investigate systemd services
+* Resolve performance issues
+
+== Learning Objectives
+
+By the end of this lab, you will be able to:
+
+* Detect system performance issues using basic monitoring commands
+* Use systemd tools to identify and manage problematic services
+* Analyze resource usage with system monitoring utilities
+* Take corrective action to resolve resource consumption problems
+* Prevent issues from recurring after system reboot
+
+== Ready to Begin?
+
+Let's start by assessing the current state of the system and confirming what Scott has done.
+
+Click the *Next* button to proceed to the Initial Assessment module.

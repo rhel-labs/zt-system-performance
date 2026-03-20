@@ -1,0 +1,130 @@
+= System Tools Analysis
+
+== Quantifying the Impact
+
+We know what's causing the problem (Scott's "optimizer" service), but let's use traditional system monitoring tools to see the actual resource impact. These tools are essential for troubleshooting performance issues in any environment.
+
+[TIP]
+====
+While systemd tools are great for investigating services, traditional monitoring tools like `top` and `ps` work for *any* process, whether it's managed by systemd or not. Learning both approaches makes you more effective at troubleshooting.
+====
+
+== Using top for Real-Time Monitoring
+
+The `top` command provides a real-time, dynamic view of system resource usage:
+
+[source,bash,role=execute]
+----
+top -b -n 1 | head -20
+----
+
+We're using:
+
+* `-b` for batch mode (non-interactive, better for viewing in the terminal)
+* `-n 1` to take just one snapshot
+* `head -20` to show the top portion of the output
+
+The output shows:
+
+* *First line*: System uptime and load averages
+* *Second line*: Task counts (total, running, sleeping, etc.)
+* *Third line*: CPU usage breakdown (%us = user processes, %sy = system, %id = idle)
+* *Fourth line*: Memory usage
+* *Process list*: Top processes sorted by CPU usage
+
+[IMPORTANT]
+====
+Look at the %CPU column for each process. The `stress-ng` processes should be consuming significant CPU. Also note the `%id` (idle) value in the CPU line - low idle percentage means high CPU usage.
+====
+
+== Using ps to List Specific Processes
+
+The `ps` command provides detailed information about running processes. Let's look for stress-ng processes:
+
+[source,bash,role=execute]
+----
+ps aux | grep stress-ng | grep -v grep
+----
+
+This command:
+
+* `ps aux` lists all processes with detailed information
+* `grep stress-ng` filters for our problematic process
+* `grep -v grep` removes the grep command itself from the results
+
+The output columns include:
+
+* *USER*: Who's running the process
+* *PID*: Process ID
+* *%CPU*: CPU usage percentage
+* *%MEM*: Memory usage percentage
+* *COMMAND*: The actual command being executed
+
+[TIP]
+====
+The `aux` options mean:
+* `a` = show processes for all users
+* `u` = display user-oriented format
+* `x` = include processes without a terminal
+====
+
+== Checking Active Processes by CPU
+
+Let's use `ps` with custom formatting to see the most CPU-intensive processes:
+
+[source,bash,role=execute]
+----
+ps -eo pid,ppid,cmd,%cpu,%mem --sort=-%cpu | head -10
+----
+
+This command:
+
+* `-e` shows all processes
+* `-o` specifies custom output columns
+* `--sort=-%cpu` sorts by CPU usage (descending)
+* `head -10` shows the top 10
+
+[NOTE]
+====
+The `ppid` (Parent Process ID) is useful for understanding process relationships. In this case, the stress-ng processes should have the systemd service as their parent.
+====
+
+== Real-World Application
+
+In production environments, you might not always have access to systemd, or the problematic process might not be a service. The skills you're learning here apply to:
+
+* Legacy systems not using systemd
+* Container environments
+* Applications running as regular user processes
+* Third-party software that doesn't integrate with systemd
+
+[NOTE]
+====
+*From: Nate (Senior Sysadmin)*
+
+Perfect. Now you've used multiple tools to confirm the same thing:
+
+1. *systemctl* told us what service is running
+2. *top* showed us the real-time resource impact
+3. *ps* gave us detailed process information
+
+This is the right way to diagnose - use multiple tools to build a complete picture. Never rely on just one source of information.
+
+Now that you've thoroughly diagnosed the problem, it's time to fix it. We need to stop the service AND make sure it doesn't start again.
+
+-Nate
+====
+
+== Summary
+
+We've now used three different approaches to understand the problem:
+
+1. *Initial assessment* confirmed high load and memory usage
+2. *Systemd investigation* identified the specific service and what it's running
+3. *System tools analysis* quantified the actual resource impact
+
+All three perspectives point to the same conclusion: Scott's "system-optimizer.service" is a stress testing tool that's consuming resources, not optimizing anything.
+
+Time to fix this.
+
+Click *Next* to proceed to the Resolution module.

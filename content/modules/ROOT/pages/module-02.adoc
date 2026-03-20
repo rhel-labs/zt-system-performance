@@ -1,0 +1,88 @@
+= Initial Assessment
+
+== Confirming the Problem
+
+The first step in any troubleshooting scenario is to confirm that a problem actually exists and understand its scope. Users are reporting slow performance, but we need to verify this objectively.
+
+[IMPORTANT]
+====
+Never jump straight to solutions without first confirming the problem. What users *report* and what's *actually happening* can be different things.
+====
+
+== Checking System Load
+
+Let's start by checking the system's current load average using the `uptime` command:
+
+[source,bash,role=execute]
+----
+uptime
+----
+
+The load average shows three numbers representing the average system load over the last 1, 5, and 15 minutes. On a single-core system, a load of 1.0 means the CPU is fully utilized. Higher numbers indicate processes are waiting for CPU time.
+
+[TIP]
+====
+A load average significantly higher than the number of CPU cores (you can check this with `nproc`) indicates the system is overloaded.
+====
+
+== Quick Memory Check
+
+Let's also check memory usage with the `free` command:
+
+[source,bash,role=execute]
+----
+free -h
+----
+
+This shows total, used, and available memory in a human-readable format. Pay attention to the "available" column - this shows how much memory is actually available for new applications.
+
+== Reading Scott's Note
+
+Now let's see what Scott claims to have done:
+
+[source,bash,role=execute]
+----
+cat /home/rhel/note-from-scott.txt
+----
+
+[quote, Your Internal Monologue]
+____
+"System Performance Optimizer"... that sounds ominous. And what does "keeping CPU and memory warmed up" even mean?
+____
+
+== Understanding the Impact
+
+Based on what you've seen:
+
+* The system load is significantly elevated
+* Memory usage is higher than expected for an idle system
+* Scott installed something called "system-optimizer.service"
+
+This matches the classic pattern of a runaway process or misconfigured service consuming system resources.
+
+== The Investigation Path
+
+Now that we've confirmed there's a genuine performance problem, we need to:
+
+1. Identify exactly which process or service is consuming resources
+2. Determine if it's legitimate or problematic
+3. Take appropriate action
+
+[NOTE]
+====
+*From: Nate (Senior Sysadmin)*
+
+Good start. You've confirmed the problem exists and have an initial suspect (Scott's new service).
+
+Next step: Use systemd to investigate what this service is actually doing. Since Scott mentioned it's a service, `systemctl` should be your go-to tool.
+
+Remember - services can be running, enabled, or both. You'll want to check the status and see what the service is actually executing.
+
+-Nate
+====
+
+== Ready to Investigate?
+
+In the next module, we'll use systemd tools to dig deeper into this "system-optimizer" service and understand exactly what it's doing.
+
+Click *Next* to continue to the Systemd Investigation module.
