@@ -30,12 +30,30 @@ Before you even log in, you can probably guess this isn't going to end well...
 
 A few minutes after Scott's email, tickets start pouring in from users complaining that the server is running extremely slowly. Your task is to investigate what's happening and resolve the performance issues.
 
-Fortunately, Sysadmin Nate has left you some guidance. Let's read his note:
+Fortunately, Sysadmin Nate has left you some guidance:
 
-[source,bash,role=execute]
-----
-cat /home/rhel/note-from-nate.txt
-----
+[NOTE]
+====
+*From: Nate (Senior Sysadmin)*
+
+Hey,
+
+I saw Scott's email about his "performance optimizer." Yeah... about that.
+
+When the system feels slow or unresponsive, start with the basics:
+
+1. Check overall system load and resource usage
+2. Identify which processes are consuming resources
+3. Determine if they're supposed to be running
+4. Investigate using systemd tools if they're services
+
+I'm working on another issue right now, but you've got this. Take a methodical approach and you'll find the problem.
+
+Good luck,
+-Nate
+
+*P.S.* - When you find what's wrong, make sure to disable it so it doesn't start again on reboot. Scott tends to "fix" things repeatedly.
+====
 
 [TIP]
 ====

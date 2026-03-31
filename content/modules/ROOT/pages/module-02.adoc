@@ -36,14 +36,18 @@ free -h
 
 This shows total, used, and available memory in a human-readable format. Pay attention to the "available" column - this shows how much memory is actually available for new applications.
 
-== Reading Scott's Note
+== What Scott Claims He Did
 
-Now let's see what Scott claims to have done:
+Let's review what Scott said in his email about this "System Performance Optimizer":
 
-[source,bash,role=execute]
-----
-cat /home/rhel/note-from-scott.txt
-----
+[quote, Manager Scott - From His Email]
+____
+I installed a new "System Performance Optimizer" service on the server. I found this great tool that's supposed to help improve system performance by keeping the CPU and memory "warmed up" so things run faster.
+
+The service is called system-optimizer.service and it starts automatically.
+
+You're welcome!
+____
 
 [quote, Your Internal Monologue]
 ____
